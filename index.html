@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Juragan Warung Madura - Fast Patience Edition</title>
+    <title>Juragan Warung Madura - Dev Prank Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -109,7 +109,7 @@
             <button onclick="startGame()" class="bg-green-500 hover:bg-green-400 text-white title-font text-2xl py-4 px-10 rounded-full shadow-[0_6px_0_#166534] active:shadow-[0_0px_0_#166534] active:translate-y-2 transition-all">
                 BUKA WARUNG
             </button>
-            <p class="text-gray-300 mt-6 text-xs text-center">Setiap pelanggan cuma punya waktu 10 detik!<br>Makin tinggi level, waktu tunggu makin singkat.</p>
+            <p class="text-gray-300 mt-6 text-xs text-center">Setiap pelanggan cuma punya waktu 10 detik<br>Makin tinggi level, waktu tunggu makin singkat.</p>
         </div>
 
         <!-- LEVEL CLEAR SCREEN 🏆 -->
@@ -121,13 +121,20 @@
             </button>
         </div>
 
-        <!-- GAME OVER SCREEN -->
-        <div id="game-over-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-center glass-panel">
-            <h1 class="title-font text-5xl text-red-500 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mb-2">WARUNG TUTUP</h1>
-            <p class="text-gray-300 text-sm mb-4">Pelanggan Marah Kabur Berjamaah</p>
-            <p class="text-white text-lg mb-1">Total Pendapatan Akhir:</p>
-            <div class="text-5xl title-font text-yellow-400 mb-8 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">Rp <span id="final-score">0</span></div>
-            <button onclick="startGame()" class="bg-yellow-500 hover:bg-yellow-400 text-white title-font text-2xl py-4 px-10 rounded-full shadow-[0_6px_0_#ca8a04] active:shadow-[0_0px_0_#ca8a04] active:translate-y-2 transition-all">
+        <!-- GAME OVER SCREEN (USIL DEV EDITION 🤪) -->
+        <div id="game-over-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-center glass-panel p-4 overflow-y-auto">
+            <h1 class="title-font text-5xl md:text-6xl text-red-500 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mb-1">WARUNG TUTUP</h1>
+            <p class="text-gray-300 text-xs md:text-sm mb-3">Pelanggan Marah Kabur Berjamaah</p>
+            
+            <!-- Tempat Gambar Meme / Foto Usil Developer 📸 -->
+            <div id="game-over-meme-container" class="my-2 flex justify-center items-center">
+                <!-- Injected via JS -->
+            </div>
+
+            <p class="text-white text-base md:text-lg mt-2 mb-0.5">Total Pendapatan Akhir:</p>
+            <div class="text-4xl md:text-5xl title-font text-yellow-400 mb-6 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">Rp <span id="final-score">0</span></div>
+            
+            <button onclick="startGame()" class="bg-yellow-500 hover:bg-yellow-400 text-white title-font text-xl md:text-2xl py-3.5 px-8 rounded-full shadow-[0_6px_0_#ca8a04] active:shadow-[0_0px_0_#ca8a04] active:translate-y-2 transition-all">
                 MAIN LAGI DARI LEVEL 1
             </button>
         </div>
@@ -183,6 +190,16 @@
             "images/gibran_gambar.png"
         ];
 
+        // =========================================================================
+        // 😜 MASUKIN LIST GAMBAR MEME / FOTO USIL DEVELPOER LU DI SINI BRE!
+        // =========================================================================
+        const GAME_OVER_MEMES = [
+            "images/meme_kalah1.png",
+            "images/meme_kalah2.png",
+            "images/meme_kalah3.png",
+            "images/meme_kalah4.png",
+        ];
+
         // Game Configuration & Data
         const ITEMS = [
             { id: 'beras', emoji: '🍚', name: 'Beras' },
@@ -207,13 +224,14 @@
         let spawnInterval;
         let isPlaying = false;
 
-        let levelTargetCustomers = 5; // Target kuota per level
-        let spawnedCustomersCount = 0; // Berapa yang udah muncul di level ini
-        let servedCustomersCount = 0;  // Berapa yang sukses dilayanin
+        let levelTargetCustomers = 5; 
+        let spawnedCustomersCount = 0; 
+        let servedCustomersCount = 0;  
 
         // DOM Elements
         const elStartScreen = document.getElementById('start-screen');
         const elGameOverScreen = document.getElementById('game-over-screen');
+        const elGameOverMemeContainer = document.getElementById('game-over-meme-container');
         const elLevelClearScreen = document.getElementById('level-clear-screen');
         const elCurrentLevel = document.getElementById('current-level');
         const elCustomerProgress = document.getElementById('customer-progress');
@@ -329,19 +347,13 @@
             return orders;
         }
 
-        // Kalkulasi Patience Rate (Base 10 Detik di Level 1) ⚙️
         function getLevelPatienceRate() {
-            // Game loop update tiap 100ms (10 tick = 1 detik).
-            // Level 1 = 1.0 per tick -> Waktu pas 10 detik (100% / 10 = 10 detik) ⏱️
             let baseRate = 1.0; 
-            
             if (currentLevel === 2) {
-                baseRate = 1.05; // Level 2: 5% lebih cepat (~9.5 detik)
+                baseRate = 1.05; 
             } else if (currentLevel >= 3) {
-                baseRate = 1.0 + (currentLevel * 0.05); // Level 3: 15% lebih cepat (~8.7 detik), dst.
+                baseRate = 1.0 + (currentLevel * 0.05); 
             }
-            
-            // Variasi kecil antar pelanggan
             return baseRate + (Math.random() * 0.1);
         }
 
@@ -481,7 +493,6 @@
                 playWrongSFX();
                 playOhNoSFX();
 
-                // Penalti salah pilih barang: langsung potong 20% kesabaran 🚫
                 activeCustomer.patience = Math.max(0, activeCustomer.patience - 20);
                 updatePatienceBarsDOM();
 
@@ -606,6 +617,22 @@
             spawnInterval = setInterval(spawnCustomer, spawnDelay);
         }
 
+        // Render Gambar Meme Usil Pas Kalah 🤪
+        function renderGameOverMeme() {
+            if (!elGameOverMemeContainer) return;
+            
+            if (GAME_OVER_MEMES && GAME_OVER_MEMES.length > 0) {
+                const randomMeme = GAME_OVER_MEMES[Math.floor(Math.random() * GAME_OVER_MEMES.length)];
+                elGameOverMemeContainer.innerHTML = `
+                    <img src="${randomMeme}" 
+                         onerror="this.onerror=null; this.outerHTML='<div class=\\'text-7xl my-2 animate-bounce\\'>🤪</div>';" 
+                         class="w-36 h-36 md:w-44 md:h-44 object-contain rounded-2xl border-4 border-yellow-400 shadow-2xl bg-black/40">
+                `;
+            } else {
+                elGameOverMemeContainer.innerHTML = `<div class="text-7xl my-2 animate-bounce">🤪</div>`;
+            }
+        }
+
         function endGame() {
             isPlaying = false;
             clearInterval(gameInterval);
@@ -615,6 +642,10 @@
             bgm.currentTime = 0;
 
             elFinalScore.innerText = score.toLocaleString('id-ID');
+            
+            // Render gambar usil developer pas kalah
+            renderGameOverMeme();
+
             elGameOverScreen.classList.remove('hidden');
             elGameOverScreen.classList.add('flex');
 
