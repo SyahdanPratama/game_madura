@@ -121,22 +121,29 @@
             </button>
         </div>
 
-        <!-- GAME OVER SCREEN (USIL DEV EDITION 🤪) -->
-        <div id="game-over-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-center glass-panel p-4 overflow-y-auto">
-            <h1 class="title-font text-5xl md:text-6xl text-red-500 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mb-1">WARUNG TUTUP</h1>
-            <p class="text-gray-300 text-xs md:text-sm mb-3">Pelanggan Marah Kabur Berjamaah</p>
+        <!-- GAME OVER SCREEN (MOBILE OPTIMIZED 🤪) -->
+        <div id="game-over-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-between glass-panel pt-6 pb-8 px-4 overflow-y-auto">
             
-            <!-- Tempat Gambar Meme / Foto Usil Developer 📸 -->
-            <div id="game-over-meme-container" class="my-2 flex justify-center items-center">
+            <!-- Header Teks Diketatin Ke Atas ⬆️ -->
+            <div class="flex flex-col items-center">
+                <h1 class="title-font text-5xl sm:text-6xl text-red-500 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] leading-none mb-1">WARUNG TUTUP</h1>
+                <p class="text-gray-300 text-xs sm:text-sm">Pelanggan Marah Kabur Berjamaah</p>
+            </div>
+            
+            <!-- Tempat Gambar Meme / Foto Usil Developer (Gede & Tanpa Border) 📸 -->
+            <div id="game-over-meme-container" class="my-1 flex justify-center items-center w-full">
                 <!-- Injected via JS -->
             </div>
 
-            <p class="text-white text-base md:text-lg mt-2 mb-0.5">Total Pendapatan Akhir:</p>
-            <div class="text-4xl md:text-5xl title-font text-yellow-400 mb-6 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">Rp <span id="final-score">0</span></div>
-            
-            <button onclick="startGame()" class="bg-yellow-500 hover:bg-yellow-400 text-white title-font text-xl md:text-2xl py-3.5 px-8 rounded-full shadow-[0_6px_0_#ca8a04] active:shadow-[0_0px_0_#ca8a04] active:translate-y-2 transition-all">
-                MAIN LAGI DARI LEVEL 1
-            </button>
+            <!-- Total Pendapatan & Tombol Replay 📊 -->
+            <div class="flex flex-col items-center w-full">
+                <p class="text-white text-sm sm:text-base mb-0">Total Pendapatan Akhir:</p>
+                <div class="text-4xl sm:text-5xl title-font text-yellow-400 mb-4 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">Rp <span id="final-score">0</span></div>
+                
+                <button onclick="startGame()" class="bg-yellow-500 hover:bg-yellow-400 text-white title-font text-xl sm:text-2xl py-3 px-8 rounded-full shadow-[0_6px_0_#ca8a04] active:shadow-[0_0px_0_#ca8a04] active:translate-y-2 transition-all">
+                    MAIN LAGI DARI LEVEL 1
+                </button>
+            </div>
         </div>
 
         <!-- GAME UI -->
@@ -191,13 +198,13 @@
         ];
 
         // =========================================================================
-        // 😜 MASUKIN LIST GAMBAR MEME / FOTO USIL DEVELPOER LU DI SINI BRE!
+        // 😜 MASUKIN LIST GAMBAR MEME / FOTO USIL DEVELOPER LU DI SINI BRE!
         // =========================================================================
         const GAME_OVER_MEMES = [
             "images/meme_kalah1.png",
             "images/meme_kalah2.png",
             "images/meme_kalah3.png",
-            "images/meme_kalah4.png",
+            "images/meme_kalah4.png"
         ];
 
         // Game Configuration & Data
@@ -617,7 +624,7 @@
             spawnInterval = setInterval(spawnCustomer, spawnDelay);
         }
 
-        // Render Gambar Meme Usil Pas Kalah 🤪
+        // Render Gambar Meme Usil Pas Kalah (Lebih Gede & Clean) 🤪
         function renderGameOverMeme() {
             if (!elGameOverMemeContainer) return;
             
@@ -625,11 +632,11 @@
                 const randomMeme = GAME_OVER_MEMES[Math.floor(Math.random() * GAME_OVER_MEMES.length)];
                 elGameOverMemeContainer.innerHTML = `
                     <img src="${randomMeme}" 
-                         onerror="this.onerror=null; this.outerHTML='<div class=\\'text-7xl my-2 animate-bounce\\'>🤪</div>';" 
-                         class="w-36 h-36 md:w-44 md:h-44 object-contain rounded-2xl border-4 border-yellow-400 shadow-2xl bg-black/40">
+                         onerror="this.onerror=null; this.outerHTML='<div class=\\'text-8xl my-2 animate-bounce\\'>🤪</div>';" 
+                         class="w-56 h-56 sm:w-64 sm:h-64 object-contain rounded-2xl drop-shadow-2xl">
                 `;
             } else {
-                elGameOverMemeContainer.innerHTML = `<div class="text-7xl my-2 animate-bounce">🤪</div>`;
+                elGameOverMemeContainer.innerHTML = `<div class="text-8xl my-2 animate-bounce">🤪</div>`;
             }
         }
 
