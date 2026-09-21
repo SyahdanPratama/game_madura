@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Juragan Warung Madura - SFX Edition</title>
+    <title>Juragan Warung Madura - Leveling Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -109,25 +109,40 @@
             <button onclick="startGame()" class="bg-green-500 hover:bg-green-400 text-white title-font text-2xl py-4 px-10 rounded-full shadow-[0_6px_0_#166534] active:shadow-[0_0px_0_#166534] active:translate-y-2 transition-all">
                 BUKA WARUNG
             </button>
-            <p class="text-gray-300 mt-6 text-xs text-center">Maksimal 5 pelanggan mengantre!<br>Jangan sampai ada yang kabur karena kelamaan.</p>
+            <p class="text-gray-300 mt-6 text-xs text-center">Tingkatkan level warungmu!<br>Makin tinggi level, pelanggan makin banyak & ga sabaran.</p>
+        </div>
+
+        <!-- LEVEL CLEAR SCREEN 🏆 -->
+        <div id="level-clear-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-center glass-panel p-4">
+            <h1 class="title-font text-4xl md:text-5xl text-green-400 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mb-2">LEVEL CLEARED 🌟</h1>
+            <p class="text-gray-200 text-base mb-6">Warung Lu Laris Manis Mantap Bre</p>
+            <button onclick="nextLevel()" class="bg-yellow-500 hover:bg-yellow-400 text-white title-font text-2xl py-4 px-10 rounded-full shadow-[0_6px_0_#ca8a04] active:shadow-[0_0px_0_#ca8a04] active:translate-y-2 transition-all">
+                LANJUT LEVEL <span id="next-level-num">2</span> 🚀
+            </button>
         </div>
 
         <!-- GAME OVER SCREEN -->
         <div id="game-over-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-center glass-panel">
-            <h1 class="title-font text-5xl text-red-500 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mb-2">WARUNG TUTUP!</h1>
+            <h1 class="title-font text-5xl text-red-500 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mb-2">WARUNG TUTUP</h1>
             <p class="text-gray-300 text-sm mb-4">Pelanggan Marah Kabur Berjamaah</p>
-            <p class="text-white text-lg mb-1">Total Pendapatan:</p>
+            <p class="text-white text-lg mb-1">Total Pendapatan Akhir:</p>
             <div class="text-5xl title-font text-yellow-400 mb-8 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">Rp <span id="final-score">0</span></div>
             <button onclick="startGame()" class="bg-yellow-500 hover:bg-yellow-400 text-white title-font text-2xl py-4 px-10 rounded-full shadow-[0_6px_0_#ca8a04] active:shadow-[0_0px_0_#ca8a04] active:translate-y-2 transition-all">
-                BUKA LAGI
+                MAIN LAGI DARI LEVEL 1
             </button>
         </div>
 
         <!-- GAME UI -->
         <!-- HUD Layer -->
         <div class="h-[12%] w-full flex justify-between items-center px-4 z-10 pt-2">
-            <div class="bg-black/60 px-4 py-1.5 rounded-full border border-yellow-500/50 shadow-md">
-                <span class="text-yellow-400 text-lg md:text-xl font-bold title-font">Rp <span id="score">0</span></span>
+            <div class="flex items-center gap-2">
+                <div class="bg-black/60 px-4 py-1.5 rounded-full border border-yellow-500/50 shadow-md">
+                    <span class="text-yellow-400 text-lg md:text-xl font-bold title-font">Rp <span id="score">0</span></span>
+                </div>
+                <!-- Display Level & Progress Pelanggan 🎯 -->
+                <div class="bg-amber-600/90 text-white px-3 py-1 rounded-full border border-amber-300 text-xs md:text-sm font-bold title-font shadow-md">
+                    LVL <span id="current-level">1</span> 🎯 <span id="customer-progress">0/5</span>
+                </div>
             </div>
             <!-- Health / Lives -->
             <div class="bg-black/60 px-3 py-1.5 rounded-full border border-red-500/50 flex gap-1 text-xl" id="lives-container">
@@ -182,7 +197,8 @@
 
         const DEFAULT_CUSTOMERS = ['👨', '👩', '👴', '👵', '👮', '👷', '🧑‍🎓', '🕵️‍♂️'];
 
-        // Game State
+        // Game State & Level Variables 🎮
+        let currentLevel = 1;
         let score = 0;
         let lives = 3;
         let queue = [];
@@ -191,9 +207,17 @@
         let spawnInterval;
         let isPlaying = false;
 
+        let levelTargetCustomers = 5; // Target kuota per level
+        let spawnedCustomersCount = 0; // Berapa yang udah muncul di level ini
+        let servedCustomersCount = 0;  // Berapa yang sukses dilayanin
+
         // DOM Elements
         const elStartScreen = document.getElementById('start-screen');
         const elGameOverScreen = document.getElementById('game-over-screen');
+        const elLevelClearScreen = document.getElementById('level-clear-screen');
+        const elCurrentLevel = document.getElementById('current-level');
+        const elCustomerProgress = document.getElementById('customer-progress');
+        const elNextLevelNum = document.getElementById('next-level-num');
         const elScore = document.getElementById('score');
         const elFinalScore = document.getElementById('final-score');
         const elLivesContainer = document.getElementById('lives-container');
@@ -214,7 +238,6 @@
             }
         }
 
-        // Fungsi Memutar SFX MP3 🎙️
         function playThankYouSFX() {
             if (sfxThankYou) {
                 sfxThankYou.currentTime = 0;
@@ -306,8 +329,25 @@
             return orders;
         }
 
+        // Kalkulasi Patience Rate Berdasarkan Level ⚙️
+        function getLevelPatienceRate() {
+            // Level 1: Base santai (0.15)
+            // Level 2: +5% (0.20)
+            // Level 3: +15% (0.30)
+            // Level N: Nambah terus scalingnya
+            let baseRate = 0.15;
+            if (currentLevel === 2) {
+                baseRate = 0.20;
+            } else if (currentLevel >= 3) {
+                baseRate = 0.15 + (currentLevel * 0.05); 
+            }
+            return baseRate + (Math.random() * 0.1);
+        }
+
         function spawnCustomer() {
             if (queue.length >= MAX_QUEUE_SIZE) return;
+            // Kalo jumlah pelanggan yang di-spawn udah nyampe target level, stop datengin pelanggan baru
+            if (spawnedCustomersCount >= levelTargetCustomers) return;
 
             let avatarHtml = '';
             const randomEmojiFallback = DEFAULT_CUSTOMERS[Math.floor(Math.random() * DEFAULT_CUSTOMERS.length)];
@@ -325,11 +365,18 @@
                 avatarHtml: avatarHtml,
                 orders: generateOrders(),
                 patience: 100,
-                patienceRate: 0.50 + (Math.random() * 0.3)
+                patienceRate: getLevelPatienceRate()
             };
 
             queue.push(customer);
+            spawnedCustomersCount++;
             rebuildQueueDOM();
+        }
+
+        function updateHUD() {
+            elScore.innerText = score.toLocaleString('id-ID');
+            elCurrentLevel.innerText = currentLevel;
+            elCustomerProgress.innerText = `${servedCustomersCount}/${levelTargetCustomers}`;
         }
 
         function rebuildQueueDOM() {
@@ -346,22 +393,18 @@
                 ).join(' ');
 
                 slot.innerHTML = `
-                    <!-- Speech Bubble -->
                     <div class="speech-bubble bg-white rounded-2xl px-3 py-1.5 absolute -top-16 sm:-top-20 shadow-2xl flex gap-1.5 items-center border-2 border-amber-300 order-box z-40">
                         ${ordersHtml}
                     </div>
 
-                    <!-- Patience Bar -->
                     <div class="w-16 sm:w-20 md:w-28 h-2.5 bg-gray-900 rounded-full overflow-hidden mb-1 border-2 border-gray-700 shadow-md">
                         <div class="patience-bar-inner h-full bg-green-500 transition-all duration-100 origin-left" style="width: ${customer.patience}%"></div>
                     </div>
 
-                    <!-- Avatar Container -->
                     <div class="customer-avatar flex items-center justify-center ${isFront ? 'ring-4 ring-yellow-400 rounded-2xl p-1 bg-amber-900/40 shadow-xl' : ''}">
                         ${customer.avatarHtml}
                     </div>
 
-                    <!-- Front indicator -->
                     ${isFront ? '<span class="text-[10px] md:text-xs bg-yellow-400 text-black font-bold px-2 py-0.5 rounded-full mt-1 title-font shadow-md">GILIRAN!</span>' : ''}
                 `;
 
@@ -420,21 +463,23 @@
 
                 if (isAllComplete) {
                     score += activeCustomer.orders.length * 100;
-                    elScore.innerText = score.toLocaleString('id-ID');
-                    createFloatingText(clientX, clientY, `+${activeCustomer.orders.length * 100}`);
+                    servedCustomersCount++; // Pelanggan berhasil dilayanin 🎯
+                    updateHUD();
                     
-                    // Suara "Thank You!" pas pesanan beres dilayanin 🗣️✨
+                    createFloatingText(clientX, clientY, `+${activeCustomer.orders.length * 100}`);
                     playThankYouSFX();
 
                     queue.shift();
                     rebuildQueueDOM();
+
+                    // Cek Apakah Level Sudah Selesai 🏆
+                    checkLevelCompletion();
                 } else {
                     playClickSFX();
                     rebuildQueueDOM();
                 }
             } else {
                 playWrongSFX();
-                // Suara "Oh No!" pas salah kasih barang 😱
                 playOhNoSFX();
 
                 activeCustomer.patience = Math.max(0, activeCustomer.patience - 15);
@@ -445,6 +490,19 @@
                 setTimeout(() => {
                     bg.style.background = "url('images/bg_warung.png') center/cover no-repeat, radial-gradient(circle at center, #d97736 0%, #8b4513 100%)";
                 }, 150);
+            }
+        }
+
+        function checkLevelCompletion() {
+            // Level tamat kalo semua target pelanggan udah di-spawn dan antrean udah habis terlayani
+            if (servedCustomersCount >= levelTargetCustomers && queue.length === 0) {
+                isPlaying = false;
+                clearInterval(gameInterval);
+                clearInterval(spawnInterval);
+
+                elNextLevelNum.innerText = currentLevel + 1;
+                elLevelClearScreen.classList.remove('hidden');
+                elLevelClearScreen.classList.add('flex');
             }
         }
 
@@ -461,8 +519,6 @@
                     lives--;
                     updateLivesDisplay();
                     playWrongSFX();
-                    
-                    // Suara "Oh No!" pas pelanggan kabur gara-gara kehabisan waktu 😱💨
                     playOhNoSFX();
 
                     queueChanged = true;
@@ -476,6 +532,7 @@
 
             if (queueChanged) {
                 rebuildQueueDOM();
+                checkLevelCompletion();
             } else {
                 updatePatienceBarsDOM();
             }
@@ -488,6 +545,14 @@
             elLivesContainer.innerText = hearts.trim();
         }
 
+        function setupLevelConfig() {
+            // Level 1 = 5 orang, Level 2 = 10 orang, Level 3 = 15 orang, dst.
+            levelTargetCustomers = currentLevel * 5; 
+            spawnedCustomersCount = 0;
+            servedCustomersCount = 0;
+            updateHUD();
+        }
+
         function startGame() {
             initAudio();
             playClickSFX();
@@ -495,18 +560,43 @@
             bgm.volume = 0.3;
             bgm.play().catch(() => console.log("BGM autoplay blocked"));
 
+            currentLevel = 1;
             score = 0;
             lives = 3;
             queue = [];
             isPlaying = true;
 
-            elScore.innerText = '0';
+            setupLevelConfig();
             updateLivesDisplay();
 
             elStartScreen.classList.add('hidden');
             elGameOverScreen.classList.add('hidden');
+            elLevelClearScreen.classList.add('hidden');
 
             renderInventory();
+
+            // Spawn awal
+            spawnCustomer();
+            spawnCustomer();
+
+            if (gameInterval) clearInterval(gameInterval);
+            if (spawnInterval) clearInterval(spawnInterval);
+
+            // Spawn rate makin cepat seiring naik level
+            let spawnDelay = Math.max(1500, 3500 - (currentLevel * 300));
+
+            gameInterval = setInterval(updateGameLoop, 100);
+            spawnInterval = setInterval(spawnCustomer, spawnDelay);
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            queue = [];
+            isPlaying = true;
+
+            setupLevelConfig();
+
+            elLevelClearScreen.classList.add('hidden');
 
             spawnCustomer();
             spawnCustomer();
@@ -514,8 +604,10 @@
             if (gameInterval) clearInterval(gameInterval);
             if (spawnInterval) clearInterval(spawnInterval);
 
+            let spawnDelay = Math.max(1200, 3500 - (currentLevel * 400));
+
             gameInterval = setInterval(updateGameLoop, 100);
-            spawnInterval = setInterval(spawnCustomer, 2800);
+            spawnInterval = setInterval(spawnCustomer, spawnDelay);
         }
 
         function endGame() {
