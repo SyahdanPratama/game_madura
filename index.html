@@ -325,7 +325,7 @@
                 avatarHtml: avatarHtml,
                 orders: generateOrders(),
                 patience: 100,
-                patienceRate: 0.15 + (Math.random() * 0.1)
+                patienceRate: 0.35 + (Math.random() * 0.2)
             };
 
             queue.push(customer);
@@ -515,7 +515,7 @@
             if (spawnInterval) clearInterval(spawnInterval);
 
             gameInterval = setInterval(updateGameLoop, 100);
-            spawnInterval = setInterval(spawnCustomer, 3500);
+            spawnInterval = setInterval(spawnCustomer, 2000);
         }
 
         function endGame() {
