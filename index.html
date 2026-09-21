@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Juragan Warung Madura - Custom Assets</title>
+    <title>Juragan Warung Madura - Big Avatar Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -50,7 +50,7 @@
             position: absolute;
             color: #4ade80;
             font-weight: bold;
-            font-size: 2rem;
+            font-size: 2.5rem;
             text-shadow: 2px 2px 0 #000;
             pointer-events: none;
             animation: floatUp 1s ease-out forwards;
@@ -74,10 +74,10 @@
         .speech-bubble::after {
             content: '';
             position: absolute;
-            bottom: -10px;
+            bottom: -12px;
             left: 50%;
             transform: translateX(-50%);
-            border-width: 10px 10px 0;
+            border-width: 12px 12px 0;
             border-style: solid;
             border-color: white transparent transparent transparent;
             display: block;
@@ -132,7 +132,7 @@
         <!-- Queue Area (Top Half) -->
         <div class="h-[43%] w-full relative flex items-end justify-center pb-2 px-2">
             <!-- 5 Customer Slots Container -->
-            <div id="queue-container" class="w-full max-w-2xl h-full flex items-end justify-around z-20 relative">
+            <div id="queue-container" class="w-full max-w-4xl h-full flex items-end justify-around z-20 relative">
                 <!-- Customers rendered here -->
             </div>
 
@@ -151,8 +151,6 @@
     <script>
         // =========================================================================
         // 🖼️ MASUKKIN LINK GAMBAR PELANGGAN LU DI SINI, BRE!
-        // Lu bisa isi link URL gambar online (PNG/JPG/WebP) sebanyak-banyaknya.
-        // Kalo array ini lu kosongin [], game bakal otomatis pake Emoji bawaan.
         // =========================================================================
         const CUSTOM_IMAGE_URLS = [
             "images/windah_gambar.png",
@@ -160,7 +158,6 @@
             "https://api.dicebear.com/7.x/bottts/svg?seed=Pelanggan3",
             "https://api.dicebear.com/7.x/bottts/svg?seed=Pelanggan4",
             "https://api.dicebear.com/7.x/bottts/svg?seed=Pelanggan5"
-            // Tambahin link gambar lu sendiri di sini ya, pisahkan pake koma (,)
         ];
 
         // Game Configuration & Data
@@ -286,13 +283,13 @@
             if (queue.length >= MAX_QUEUE_SIZE) return;
 
             let avatarHtml = '';
-            // Kalo array CUSTOM_IMAGE_URLS ada isinya, panggil gambarnya secara acak 🖼️
+            // Gedein ukuran gambar & emoji pelanggan di sini 🚀
             if (CUSTOM_IMAGE_URLS && CUSTOM_IMAGE_URLS.length > 0) {
                 const randomImg = CUSTOM_IMAGE_URLS[Math.floor(Math.random() * CUSTOM_IMAGE_URLS.length)];
-                avatarHtml = `<img src="${randomImg}" class="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-lg">`;
+                avatarHtml = `<img src="${randomImg}" class="w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 object-contain drop-shadow-2xl">`;
             } else {
                 const randomEmoji = DEFAULT_CUSTOMERS[Math.floor(Math.random() * DEFAULT_CUSTOMERS.length)];
-                avatarHtml = `<span class="text-5xl md:text-6xl drop-shadow-lg">${randomEmoji}</span>`;
+                avatarHtml = `<span class="text-7xl sm:text-8xl md:text-9xl drop-shadow-2xl">${randomEmoji}</span>`;
             }
 
             const customerId = 'cust_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
@@ -315,30 +312,31 @@
                 const isFront = index === 0;
                 const slot = document.createElement('div');
                 slot.id = customer.id;
-                slot.className = `relative flex flex-col items-center transition-all duration-300 animate-pop-in ${isFront ? 'scale-110 z-30' : 'opacity-80 scale-90 z-20'}`;
+                slot.className = `relative flex flex-col items-center transition-all duration-300 animate-pop-in ${isFront ? 'scale-110 z-30' : 'opacity-85 scale-95 z-20'}`;
 
+                // Gedein emoji pesanan di dalam bubble chat 🍚🥚☕
                 let ordersHtml = customer.orders.map(ord => 
-                    `<span class="text-xl md:text-2xl ${ord.fulfilled ? 'opacity-30 grayscale' : 'drop-shadow-sm'}">${ord.emoji}${ord.fulfilled ? '✅' : ''}</span>`
+                    `<span class="text-2xl sm:text-3xl md:text-4xl ${ord.fulfilled ? 'opacity-30 grayscale' : 'drop-shadow-md'}">${ord.emoji}${ord.fulfilled ? '✅' : ''}</span>`
                 ).join(' ');
 
                 slot.innerHTML = `
-                    <!-- Speech Bubble -->
-                    <div class="speech-bubble bg-white rounded-xl px-2 py-1 absolute -top-12 shadow-lg flex gap-1 items-center border border-gray-200 order-box">
+                    <!-- Speech Bubble (Gede & Jelas) -->
+                    <div class="speech-bubble bg-white rounded-2xl px-3 py-1.5 absolute -top-16 sm:-top-20 shadow-2xl flex gap-1.5 items-center border-2 border-amber-300 order-box z-40">
                         ${ordersHtml}
                     </div>
 
-                    <!-- Patience Bar -->
-                    <div class="w-12 md:w-16 h-2 bg-gray-900 rounded-full overflow-hidden mb-1 border border-gray-700">
+                    <!-- Patience Bar (Lebih Lebar) -->
+                    <div class="w-16 sm:w-20 md:w-28 h-2.5 bg-gray-900 rounded-full overflow-hidden mb-1 border-2 border-gray-700 shadow-md">
                         <div class="patience-bar-inner h-full bg-green-500 transition-all duration-100 origin-left" style="width: ${customer.patience}%"></div>
                     </div>
 
-                    <!-- Avatar -->
-                    <div class="customer-avatar ${isFront ? 'ring-2 ring-yellow-400 rounded-full p-1 bg-amber-900/30' : ''}">
+                    <!-- Avatar Container -->
+                    <div class="customer-avatar flex items-center justify-center ${isFront ? 'ring-4 ring-yellow-400 rounded-2xl p-1 bg-amber-900/40 shadow-xl' : ''}">
                         ${customer.avatarHtml}
                     </div>
 
                     <!-- Front indicator -->
-                    ${isFront ? '<span class="text-[9px] bg-yellow-400 text-black font-bold px-1.5 rounded-full mt-1 title-font">GILIRAN!</span>' : ''}
+                    ${isFront ? '<span class="text-[10px] md:text-xs bg-yellow-400 text-black font-bold px-2 py-0.5 rounded-full mt-1 title-font shadow-md">GILIRAN!</span>' : ''}
                 `;
 
                 elQueueContainer.appendChild(slot);
