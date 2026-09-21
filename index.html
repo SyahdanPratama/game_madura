@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Juragan Warung Madura - Big Avatar Edition</title>
+    <title>Juragan Warung Madura - SFX Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -23,7 +23,7 @@
             height: 100vh;
             height: 100dvh;
             position: relative;
-            background: url('images/bg_warung.png') no-repeat center center;
+            background: url('images/bg_warung.png') center/cover no-repeat, radial-gradient(circle at center, #d97736 0%, #8b4513 100%);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -89,9 +89,15 @@
 
     <div id="game-container">
         
-        <!-- Audio BGM -->
+        <!-- Audio BGM & SFX 🎧 -->
         <audio id="bgm" loop>
             <source src="audio/lagu_game.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="sfx-thankyou">
+            <source src="audio/suara_cihuy.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="sfx-ohno">
+            <source src="audio/suara_antekbowo.mp3" type="audio/mpeg">
         </audio>
 
         <!-- START SCREEN -->
@@ -150,7 +156,7 @@
 
     <script>
         // =========================================================================
-        // 🖼️ MASUKKIN LINK GAMBAR PELANGGAN LU DI SINI, BRE!
+        // 🖼️ LIST GAMBAR PELANGGAN LOKAL LU
         // =========================================================================
         const CUSTOM_IMAGE_URLS = [
             "images/windah_gambar.png",
@@ -159,7 +165,7 @@
             "images/epstein_gambar.png",
             "images/mansur_gambar.png",
             "images/patrick_gambar.png",
-            "images/gibran_gambar.png",
+            "images/gibran_gambar.png"
         ];
 
         // Game Configuration & Data
@@ -194,6 +200,8 @@
         const elQueueContainer = document.getElementById('queue-container');
         const elInventoryGrid = document.getElementById('inventory-grid');
         const bgm = document.getElementById('bgm');
+        const sfxThankYou = document.getElementById('sfx-thankyou');
+        const sfxOhNo = document.getElementById('sfx-ohno');
 
         // Audio Context Setup
         let audioCtx;
@@ -203,6 +211,23 @@
             }
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
+            }
+        }
+
+        // Fungsi Memutar SFX MP3 🎙️
+        function playThankYouSFX() {
+            if (sfxThankYou) {
+                sfxThankYou.currentTime = 0;
+                sfxThankYou.volume = 0.8;
+                sfxThankYou.play().catch(e => console.log("SFX Thank You blocked", e));
+            }
+        }
+
+        function playOhNoSFX() {
+            if (sfxOhNo) {
+                sfxOhNo.currentTime = 0;
+                sfxOhNo.volume = 0.8;
+                sfxOhNo.play().catch(e => console.log("SFX Oh No blocked", e));
             }
         }
 
@@ -285,13 +310,13 @@
             if (queue.length >= MAX_QUEUE_SIZE) return;
 
             let avatarHtml = '';
-            // Gedein ukuran gambar & emoji pelanggan di sini 🚀
+            const randomEmojiFallback = DEFAULT_CUSTOMERS[Math.floor(Math.random() * DEFAULT_CUSTOMERS.length)];
+
             if (CUSTOM_IMAGE_URLS && CUSTOM_IMAGE_URLS.length > 0) {
                 const randomImg = CUSTOM_IMAGE_URLS[Math.floor(Math.random() * CUSTOM_IMAGE_URLS.length)];
-                avatarHtml = `<img src="${randomImg}" class="w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 object-contain drop-shadow-2xl">`;
+                avatarHtml = `<img src="${randomImg}" onerror="this.onerror=null; this.outerHTML='<span class=\\'text-7xl sm:text-8xl md:text-9xl drop-shadow-2xl\\'>${randomEmojiFallback}</span>';" class="w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 object-contain drop-shadow-2xl">`;
             } else {
-                const randomEmoji = DEFAULT_CUSTOMERS[Math.floor(Math.random() * DEFAULT_CUSTOMERS.length)];
-                avatarHtml = `<span class="text-7xl sm:text-8xl md:text-9xl drop-shadow-2xl">${randomEmoji}</span>`;
+                avatarHtml = `<span class="text-7xl sm:text-8xl md:text-9xl drop-shadow-2xl">${randomEmojiFallback}</span>`;
             }
 
             const customerId = 'cust_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
@@ -316,18 +341,17 @@
                 slot.id = customer.id;
                 slot.className = `relative flex flex-col items-center transition-all duration-300 animate-pop-in ${isFront ? 'scale-110 z-30' : 'opacity-85 scale-95 z-20'}`;
 
-                // Gedein emoji pesanan di dalam bubble chat 🍚🥚☕
                 let ordersHtml = customer.orders.map(ord => 
                     `<span class="text-2xl sm:text-3xl md:text-4xl ${ord.fulfilled ? 'opacity-30 grayscale' : 'drop-shadow-md'}">${ord.emoji}${ord.fulfilled ? '✅' : ''}</span>`
                 ).join(' ');
 
                 slot.innerHTML = `
-                    <!-- Speech Bubble (Gede & Jelas) -->
+                    <!-- Speech Bubble -->
                     <div class="speech-bubble bg-white rounded-2xl px-3 py-1.5 absolute -top-16 sm:-top-20 shadow-2xl flex gap-1.5 items-center border-2 border-amber-300 order-box z-40">
                         ${ordersHtml}
                     </div>
 
-                    <!-- Patience Bar (Lebih Lebar) -->
+                    <!-- Patience Bar -->
                     <div class="w-16 sm:w-20 md:w-28 h-2.5 bg-gray-900 rounded-full overflow-hidden mb-1 border-2 border-gray-700 shadow-md">
                         <div class="patience-bar-inner h-full bg-green-500 transition-all duration-100 origin-left" style="width: ${customer.patience}%"></div>
                     </div>
@@ -399,6 +423,9 @@
                     elScore.innerText = score.toLocaleString('id-ID');
                     createFloatingText(clientX, clientY, `+${activeCustomer.orders.length * 100}`);
                     
+                    // Suara "Thank You!" pas pesanan beres dilayanin 🗣️✨
+                    playThankYouSFX();
+
                     queue.shift();
                     rebuildQueueDOM();
                 } else {
@@ -407,13 +434,16 @@
                 }
             } else {
                 playWrongSFX();
+                // Suara "Oh No!" pas salah kasih barang 😱
+                playOhNoSFX();
+
                 activeCustomer.patience = Math.max(0, activeCustomer.patience - 15);
                 updatePatienceBarsDOM();
 
                 const bg = document.getElementById('game-container');
                 bg.style.background = 'radial-gradient(circle at center, #ef4444 0%, #7f1d1d 100%)';
                 setTimeout(() => {
-                    bg.style.background = 'radial-gradient(circle at center, #d97736 0%, #8b4513 100%)';
+                    bg.style.background = "url('images/bg_warung.png') center/cover no-repeat, radial-gradient(circle at center, #d97736 0%, #8b4513 100%)";
                 }, 150);
             }
         }
@@ -431,6 +461,10 @@
                     lives--;
                     updateLivesDisplay();
                     playWrongSFX();
+                    
+                    // Suara "Oh No!" pas pelanggan kabur gara-gara kehabisan waktu 😱💨
+                    playOhNoSFX();
+
                     queueChanged = true;
 
                     if (lives <= 0) {
@@ -497,6 +531,7 @@
             elGameOverScreen.classList.add('flex');
 
             playWrongSFX();
+            playOhNoSFX();
         }
 
         window.onload = () => {
