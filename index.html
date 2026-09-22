@@ -205,9 +205,17 @@
 
     <script>
         // =========================================================================
-        // 🖼️ GAMBAR BANNER TAMPILAN AWAL (START SCREEN) 🏪✨
+        // 🖼️ LIST GAMBAR BANNER TAMPILAN AWAL (RANDOM START SCREEN) 🏪✨
+        // Tambahin nama file gambar lu di dalam array ini bre! 👇
         // =========================================================================
-        const START_SCREEN_IMAGE = "images/logo_warung.png";
+        const START_SCREEN_IMAGES = [
+            "images/gambar_depan.png",
+            "images/gambar_depan2.png",
+            "images/gambar_depan3.png",
+            "images/gambar_depan4.png",
+            "images/gambar_depan5.png",
+            "images/gambar_depan6.png",
+        ];
 
         // =========================================================================
         // 🏆 LIST GAMBAR SELEBRASI PAS LEVEL CLEAR (MENANG) 🌟
@@ -221,7 +229,6 @@
             "images/meme_menang6.png",
             "images/meme_menang7.png",
             "images/meme_menang8.png"
-
         ];
 
         // =========================================================================
@@ -232,7 +239,7 @@
             "audio/sfx_menang2.mp3",
             "audio/sfx_menang3.mp3",
             "audio/sfx_menang4.mp3",
-            "audio/sfx_menang5.mp3",
+            "audio/sfx_menang5.mp3"
         ];
 
         // =========================================================================
@@ -274,7 +281,7 @@
             "audio/sfx_kalah4.mp3",
             "audio/sfx_kalah5.mp3",
             "audio/sfx_kalah6.mp3",
-            "audio/sfx_kalah7.mp3",
+            "audio/sfx_kalah7.mp3"
         ];
 
         // Game Configuration & Data
@@ -754,13 +761,16 @@
             spawnInterval = setInterval(spawnCustomer, spawnDelay);
         }
 
-        // Render Gambar Start Screen 🖼️🗿
+        // =========================================================================
+        // Render Gambar Start Screen secara RANDOM 🖼️🎲
+        // =========================================================================
         function renderStartScreenImage() {
             if (!elStartScreenImgContainer) return;
 
-            if (START_SCREEN_IMAGE) {
+            if (START_SCREEN_IMAGES && START_SCREEN_IMAGES.length > 0) {
+                const randomImg = START_SCREEN_IMAGES[Math.floor(Math.random() * START_SCREEN_IMAGES.length)];
                 elStartScreenImgContainer.innerHTML = `
-                    <img src="images/gambar_depan.png" 
+                    <img src="${randomImg}" 
                          onerror="this.onerror=null; this.outerHTML='<div class=\\'text-7xl font-bold\\'>🏪</div>';" 
                          class="w-52 h-52 sm:w-64 sm:h-64 object-contain rounded-2xl drop-shadow-2xl">
                 `;
@@ -812,6 +822,7 @@
             elFinalScore.innerText = score.toLocaleString('id-ID');
             
             renderGameOverMeme();
+            renderStartScreenImage(); // Acak ulang gambar start screen buat sesi berikutnya 🏪✨
             playGameOverSFX();
 
             elGameOverScreen.classList.remove('hidden');
