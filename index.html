@@ -101,6 +101,8 @@
         </audio>
         <!-- Audio SFX Ngejek Pas Game Over 🔊 -->
         <audio id="sfx-gameover"></audio>
+        <!-- Audio SFX Selebrasi Pas Level Clear 🏆 -->
+        <audio id="sfx-levelclear"></audio>
 
         <!-- START SCREEN -->
         <div id="start-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center glass-panel p-4">
@@ -119,12 +121,23 @@
         </div>
 
         <!-- LEVEL CLEAR SCREEN 🏆 -->
-        <div id="level-clear-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-center glass-panel p-4">
-            <h1 class="title-font text-4xl md:text-5xl text-green-400 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mb-2">LEVEL CLEARED 🌟</h1>
-            <p class="text-gray-200 text-base mb-6">Warung Lu Laris Manis Mantap Bre</p>
-            <button onclick="nextLevel()" class="bg-yellow-500 hover:bg-yellow-400 text-white title-font text-2xl py-4 px-10 rounded-full shadow-[0_6px_0_#ca8a04] active:shadow-[0_0px_0_#ca8a04] active:translate-y-2 transition-all">
-                LANJUT LEVEL <span id="next-level-num">2</span> 🚀
-            </button>
+        <div id="level-clear-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-between glass-panel pt-6 pb-8 px-4 overflow-y-auto">
+            
+            <div class="flex flex-col items-center text-center">
+                <h1 class="title-font text-4xl sm:text-5xl text-green-400 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mb-1">LEVEL CLEARED 🌟</h1>
+                <p class="text-gray-200 text-sm sm:text-base mb-2">Warung Lu Laris Manis Mantap Bre</p>
+            </div>
+
+            <!-- Tempat Gambar Meme / Foto Menang Lu 📸✨ -->
+            <div id="level-clear-meme-container" class="my-1 flex justify-center items-center w-full">
+                <!-- Injected via JS -->
+            </div>
+
+            <div class="flex flex-col items-center w-full">
+                <button onclick="nextLevel()" class="bg-yellow-500 hover:bg-yellow-400 text-white title-font text-xl sm:text-2xl py-3 px-8 rounded-full shadow-[0_6px_0_#ca8a04] active:shadow-[0_0px_0_#ca8a04] active:translate-y-2 transition-all">
+                    LANJUT LEVEL <span id="next-level-num">2</span> 🚀
+                </button>
+            </div>
         </div>
 
         <!-- GAME OVER SCREEN (MOBILE OPTIMIZED 🤪) -->
@@ -194,7 +207,25 @@
         // =========================================================================
         // 🖼️ GAMBAR BANNER TAMPILAN AWAL (START SCREEN) 🏪✨
         // =========================================================================
-        const START_SCREEN_IMAGE = "images/logo_warung.png"; // Boleh sesuaikan path gambarnya bre
+        const START_SCREEN_IMAGE = "images/logo_warung.png";
+
+        // =========================================================================
+        // 🏆 LIST GAMBAR SELEBRASI PAS LEVEL CLEAR (MENANG) 🌟
+        // =========================================================================
+        const LEVEL_CLEAR_MEMES = [
+            "images/menang1.png",
+            "images/menang2.png",
+            "images/menang3.png"
+        ];
+
+        // =========================================================================
+        // 🔊 LIST FILE AUDIO/SFX SELEBRASI PAS LEVEL CLEAR
+        // =========================================================================
+        const LEVEL_CLEAR_SFX = [
+            "audio/sfx_menang1.mp3",
+            "audio/sfx_menang2.mp3",
+            "audio/sfx_menang3.mp3"
+        ];
 
         // =========================================================================
         // 🖼️ LIST GAMBAR PELANGGAN LOKAL LU
@@ -210,7 +241,7 @@
         ];
 
         // =========================================================================
-        // 😜 LIST GAMBAR MEME / FOTO USIL DEVELOPER LU
+        // 😜 LIST GAMBAR MEME / FOTO USIL DEVELOPER LU Pas Game Over
         // =========================================================================
         const GAME_OVER_MEMES = [
             "images/meme_kalah1.png",
@@ -266,6 +297,7 @@
         const elGameOverScreen = document.getElementById('game-over-screen');
         const elGameOverMemeContainer = document.getElementById('game-over-meme-container');
         const elLevelClearScreen = document.getElementById('level-clear-screen');
+        const elLevelClearMemeContainer = document.getElementById('level-clear-meme-container');
         const elCurrentLevel = document.getElementById('current-level');
         const elCustomerProgress = document.getElementById('customer-progress');
         const elNextLevelNum = document.getElementById('next-level-num');
@@ -278,6 +310,7 @@
         const sfxThankYou = document.getElementById('sfx-thankyou');
         const sfxOhNo = document.getElementById('sfx-ohno');
         const sfxGameOver = document.getElementById('sfx-gameover');
+        const sfxLevelClear = document.getElementById('sfx-levelclear');
 
         // Audio Context Setup
         let audioCtx;
@@ -306,7 +339,7 @@
             }
         }
 
-        // Fungsi Khusus Putar Audio SFX Ngejek Pas Game Over 🔊
+        // Putar SFX Game Over
         function playGameOverSFX() {
             if (!sfxGameOver) return;
             
@@ -317,7 +350,20 @@
                 sfxGameOver.volume = 0.9;
                 sfxGameOver.play().catch(e => console.log("SFX GameOver blocked", e));
             } else {
-                playOhNoSFX(); // Fallback kalau array kosong
+                playOhNoSFX();
+            }
+        }
+
+        // Putar SFX Level Clear 🔊🏆
+        function playLevelClearSFX() {
+            if (!sfxLevelClear) return;
+
+            if (LEVEL_CLEAR_SFX && LEVEL_CLEAR_SFX.length > 0) {
+                const randomSfx = LEVEL_CLEAR_SFX[Math.floor(Math.random() * LEVEL_CLEAR_SFX.length)];
+                sfxLevelClear.src = randomSfx;
+                sfxLevelClear.currentTime = 0;
+                sfxLevelClear.volume = 0.9;
+                sfxLevelClear.play().catch(e => console.log("SFX LevelClear blocked", e));
             }
         }
 
@@ -559,7 +605,14 @@
                 clearInterval(gameInterval);
                 clearInterval(spawnInterval);
 
+                bgm.pause();
+
                 elNextLevelNum.innerText = currentLevel + 1;
+                
+                // Render meme menang & putar SFX selebrasi 🏆
+                renderLevelClearMeme();
+                playLevelClearSFX();
+
                 elLevelClearScreen.classList.remove('hidden');
                 elLevelClearScreen.classList.add('flex');
             }
@@ -615,10 +668,14 @@
             initAudio();
             playClickSFX();
 
-            // Stop SFX GameOver kalau lagi bunyi pas klik restart
             if (sfxGameOver) {
                 sfxGameOver.pause();
                 sfxGameOver.currentTime = 0;
+            }
+
+            if (sfxLevelClear) {
+                sfxLevelClear.pause();
+                sfxLevelClear.currentTime = 0;
             }
 
             bgm.volume = 0.3;
@@ -652,6 +709,17 @@
         }
 
         function nextLevel() {
+            initAudio();
+            playClickSFX();
+
+            if (sfxLevelClear) {
+                sfxLevelClear.pause();
+                sfxLevelClear.currentTime = 0;
+            }
+
+            bgm.volume = 0.3;
+            bgm.play().catch(() => console.log("BGM autoplay blocked"));
+
             currentLevel++;
             queue = [];
             isPlaying = true;
@@ -672,7 +740,7 @@
             spawnInterval = setInterval(spawnCustomer, spawnDelay);
         }
 
-        // Render Gambar Start Screen Diperbesar & Tanpa Bounce 🖼️🗿
+        // Render Gambar Start Screen 🖼️🗿
         function renderStartScreenImage() {
             if (!elStartScreenImgContainer) return;
 
@@ -684,6 +752,22 @@
                 `;
             } else {
                 elStartScreenImgContainer.innerHTML = `<div class="text-7xl font-bold">🏪</div>`;
+            }
+        }
+
+        // Render Gambar Selebrasi Pas Level Clear 🏆✨
+        function renderLevelClearMeme() {
+            if (!elLevelClearMemeContainer) return;
+
+            if (LEVEL_CLEAR_MEMES && LEVEL_CLEAR_MEMES.length > 0) {
+                const randomMeme = LEVEL_CLEAR_MEMES[Math.floor(Math.random() * LEVEL_CLEAR_MEMES.length)];
+                elLevelClearMemeContainer.innerHTML = `
+                    <img src="${randomMeme}" 
+                         onerror="this.onerror=null; this.outerHTML='<div class=\\'text-8xl my-2 animate-bounce\\'>🏆</div>';" 
+                         class="w-56 h-56 sm:w-64 sm:h-64 object-contain rounded-2xl drop-shadow-2xl">
+                `;
+            } else {
+                elLevelClearMemeContainer.innerHTML = `<div class="text-8xl my-2 animate-bounce">🏆</div>`;
             }
         }
 
@@ -713,7 +797,6 @@
 
             elFinalScore.innerText = score.toLocaleString('id-ID');
             
-            // Render gambar usil & bunyikan SFX ngejek developer 🤪🔊
             renderGameOverMeme();
             playGameOverSFX();
 
