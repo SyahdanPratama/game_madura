@@ -716,7 +716,7 @@
             if (gameInterval) clearInterval(gameInterval);
             if (spawnInterval) clearInterval(spawnInterval);
 
-            let spawnDelay = Math.max(1000, 2550 - (currentLevel * 300));
+            let spawnDelay = Math.max(1000, 2000 - (currentLevel * 300));
 
             gameInterval = setInterval(updateGameLoop, 100);
             spawnInterval = setInterval(spawnCustomer, spawnDelay);
