@@ -99,6 +99,8 @@
         <audio id="sfx-ohno">
             <source src="audio/suara_antekbowo.mp3" type="audio/mpeg">
         </audio>
+        <!-- Audio SFX Ngejek Pas Game Over 🔊 -->
+        <audio id="sfx-gameover"></audio>
 
         <!-- START SCREEN -->
         <div id="start-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center glass-panel p-4">
@@ -130,7 +132,7 @@
                 <p class="text-gray-300 text-xs sm:text-sm">Pelanggan Marah Kabur Berjamaah</p>
             </div>
             
-            <!-- Tempat Gambar Meme / Foto Usil Developer (Gede & Tanpa Border) 📸 -->
+            <!-- Tempat Gambar Meme / Foto Usil Developer 📸 -->
             <div id="game-over-meme-container" class="my-1 flex justify-center items-center w-full">
                 <!-- Injected via JS -->
             </div>
@@ -198,13 +200,23 @@
         ];
 
         // =========================================================================
-        // 😜 MASUKIN LIST GAMBAR MEME / FOTO USIL DEVELOPER LU DI SINI BRE!
+        // 😜 LIST GAMBAR MEME / FOTO USIL DEVELOPER LU
         // =========================================================================
         const GAME_OVER_MEMES = [
             "images/meme_kalah1.png",
             "images/meme_kalah2.png",
             "images/meme_kalah3.png",
             "images/meme_kalah4.png"
+        ];
+
+        // =========================================================================
+        // 🔊 MASUKIN LIST FILE AUDIO/SFX NGEJEK PAS KALAH DI SINI BRE!
+        // =========================================================================
+        const GAME_OVER_SFX = [
+            "audio/sfx_kalah1.mp3",
+            "audio/sfx_kalah2.m4a",
+            "audio/sfx_kalah3.m4a",
+            "audio/sfx_kalah4.mp3"
         ];
 
         // Game Configuration & Data
@@ -251,6 +263,7 @@
         const bgm = document.getElementById('bgm');
         const sfxThankYou = document.getElementById('sfx-thankyou');
         const sfxOhNo = document.getElementById('sfx-ohno');
+        const sfxGameOver = document.getElementById('sfx-gameover');
 
         // Audio Context Setup
         let audioCtx;
@@ -276,6 +289,21 @@
                 sfxOhNo.currentTime = 0;
                 sfxOhNo.volume = 0.8;
                 sfxOhNo.play().catch(e => console.log("SFX Oh No blocked", e));
+            }
+        }
+
+        // Fungsi Khusus Putar Audio SFX Ngejek Pas Game Over 🔊
+        function playGameOverSFX() {
+            if (!sfxGameOver) return;
+            
+            if (GAME_OVER_SFX && GAME_OVER_SFX.length > 0) {
+                const randomSfx = GAME_OVER_SFX[Math.floor(Math.random() * GAME_OVER_SFX.length)];
+                sfxGameOver.src = randomSfx;
+                sfxGameOver.currentTime = 0;
+                sfxGameOver.volume = 0.9;
+                sfxGameOver.play().catch(e => console.log("SFX GameOver blocked", e));
+            } else {
+                playOhNoSFX(); // Fallback kalau array kosong
             }
         }
 
@@ -573,6 +601,12 @@
             initAudio();
             playClickSFX();
 
+            // Stop SFX GameOver kalau lagi bunyi pas klik restart
+            if (sfxGameOver) {
+                sfxGameOver.pause();
+                sfxGameOver.currentTime = 0;
+            }
+
             bgm.volume = 0.3;
             bgm.play().catch(() => console.log("BGM autoplay blocked"));
 
@@ -624,7 +658,7 @@
             spawnInterval = setInterval(spawnCustomer, spawnDelay);
         }
 
-        // Render Gambar Meme Usil Pas Kalah (Lebih Gede & Clean) 🤪
+        // Render Gambar Meme Usil Pas Kalah 🤪
         function renderGameOverMeme() {
             if (!elGameOverMemeContainer) return;
             
@@ -650,14 +684,12 @@
 
             elFinalScore.innerText = score.toLocaleString('id-ID');
             
-            // Render gambar usil developer pas kalah
+            // Render gambar usil & bunyikan SFX ngejek developer 🤪🔊
             renderGameOverMeme();
+            playGameOverSFX();
 
             elGameOverScreen.classList.remove('hidden');
             elGameOverScreen.classList.add('flex');
-
-            playWrongSFX();
-            playOhNoSFX();
         }
 
         window.onload = () => {
