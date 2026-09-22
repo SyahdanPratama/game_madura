@@ -213,9 +213,15 @@
         // 🏆 LIST GAMBAR SELEBRASI PAS LEVEL CLEAR (MENANG) 🌟
         // =========================================================================
         const LEVEL_CLEAR_MEMES = [
-            "images/menang1.png",
-            "images/menang2.png",
-            "images/menang3.png"
+            "images/meme_menang1.png",
+            "images/meme_menang2.png",
+            "images/meme_menang3.png",
+            "images/meme_menang4.png",
+            "images/meme_menang5.png",
+            "images/meme_menang6.png",
+            "images/meme_menang7.png",
+            "images/meme_menang8.png"
+
         ];
 
         // =========================================================================
@@ -251,7 +257,9 @@
             "images/meme_kalah5.png",
             "images/meme_kalah6.png",
             "images/meme_kalah7.png",
-            "images/meme_kalah8.png"
+            "images/meme_kalah8.png",
+            "images/meme_kalah9.png",
+            "images/meme_kalah10.png"
         ];
 
         // =========================================================================
@@ -613,7 +621,7 @@
 
                 elNextLevelNum.innerText = currentLevel + 1;
                 
-                // Render meme menang & putar SFX selebrasi 🏆
+                // Render meme menang tanpa bounce & putar SFX selebrasi 🏆
                 renderLevelClearMeme();
                 playLevelClearSFX();
 
@@ -759,7 +767,7 @@
             }
         }
 
-        // Render Gambar Selebrasi Pas Level Clear 🏆✨
+        // Render Gambar Selebrasi Pas Level Clear (TANPA BOUNCE 🗿) 🏆✨
         function renderLevelClearMeme() {
             if (!elLevelClearMemeContainer) return;
 
@@ -767,11 +775,11 @@
                 const randomMeme = LEVEL_CLEAR_MEMES[Math.floor(Math.random() * LEVEL_CLEAR_MEMES.length)];
                 elLevelClearMemeContainer.innerHTML = `
                     <img src="${randomMeme}" 
-                         onerror="this.onerror=null; this.outerHTML='<div class=\\'text-8xl my-2 animate-bounce\\'>🏆</div>';" 
+                         onerror="this.onerror=null; this.outerHTML='<div class=\\'text-8xl my-2\\'>🏆</div>';" 
                          class="w-56 h-56 sm:w-64 sm:h-64 object-contain rounded-2xl drop-shadow-2xl">
                 `;
             } else {
-                elLevelClearMemeContainer.innerHTML = `<div class="text-8xl my-2 animate-bounce">🏆</div>`;
+                elLevelClearMemeContainer.innerHTML = `<div class="text-8xl my-2">🏆</div>`;
             }
         }
 
