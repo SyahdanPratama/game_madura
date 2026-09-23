@@ -89,7 +89,7 @@
 
     <div id="game-container">
         
-        <!-- Audio BGM & SFX 🎧 (Atribut loop dibuang biar playlist jalan) -->
+        <!-- Audio BGM & SFX 🎧 -->
         <audio id="bgm"></audio>
         <audio id="sfx-thankyou">
             <source src="audio/suara_cihuy.mp3" type="audio/mpeg">
@@ -203,8 +203,8 @@
 
     <script>
         // =========================================================================
-        // 🎶 PLAYLIST BGM GAME BERURUTAN (SEQUENTIAL PLAYLIST) 🎼✨
-        // Masukkin semua lagu lu di sini berurutan (Lagu 1 > Lagu 2 > Lagu 3 dst)
+        // 🎶 PLAYLIST BGM GAME (SHUFFLE NO-REPEAT SYSTEM) 🎼✨
+        // Masukkin semua daftar lagu lu di sini bre
         // =========================================================================
         const BGM_PLAYLIST = [
             "audio/lagu_game.mp3",
@@ -213,9 +213,10 @@
             "audio/lagu_game4.mp3",
             "audio/lagu_game5.mp3",
             "audio/lagu_game6.mp3",
-            "audio/lagu_game7.mp3",
+            "audio/lagu_game7.mp3"
         ];
-        let currentBgmIndex = 0; // Menunjuk lagu pertama pas mulai
+        
+        let bgmQueue = []; // Antrean lagu yang siap diputer tanpa pengulangan
 
         // =========================================================================
         // 🖼️ LIST GAMBAR BANNER TAMPILAN AWAL (RANDOM START SCREEN) 🏪✨
@@ -357,32 +358,50 @@
         }
 
         // =========================================================================
-        // 🎼 SISTEM MULTI-BGM PLAYLIST BERURUTAN
+        // 🎼 LOGIKA SHUFFLE PLAYLIST TANPA PENGULANGAN 🎲🔥
         // =========================================================================
+        function getNextShuffleBGM() {
+            if (BGM_PLAYLIST.length === 0) return null;
+
+            // Jika antrean kosong (semua lagu udah pernah diputer), acak ulang dari awal 🔄
+            if (bgmQueue.length === 0) {
+                bgmQueue = [...BGM_PLAYLIST]; // Copy playlist utama
+
+                // Algoritma Fisher-Yates Shuffle buat ngacak array
+                for (let i = bgmQueue.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [bgmQueue[i], bgmQueue[j]] = [bgmQueue[j], bgmQueue[i]];
+                }
+            }
+
+            // Ambil lagu paling atas dari antrean acak 🎵
+            return bgmQueue.pop();
+        }
+
         function playBGM() {
             if (!bgm || BGM_PLAYLIST.length === 0) return;
 
-            // Kalo lagu lagi mati / paused, set lagu baru sesuai urutan
+            // Muter lagu baru cuma kalo audio lagi posisi mati / paused
             if (bgm.paused) {
-                bgm.src = BGM_PLAYLIST[currentBgmIndex];
-                bgm.volume = 0.3;
-                bgm.play().catch(e => console.log("BGM autoplay blocked", e));
+                const nextSong = getNextShuffleBGM();
+                if (nextSong) {
+                    bgm.src = nextSong;
+                    bgm.volume = 0.3;
+                    bgm.play().catch(e => console.log("BGM autoplay blocked", e));
+                }
             }
         }
 
-        // Fungsi muter lagu selanjutnya pas lagu sekarang abis 🎶
         function playNextBGM() {
-            if (BGM_PLAYLIST.length === 0) return;
-            
-            // Naikkan urutan lagu (kembali ke 0 kalo udah lagu paling akhir)
-            currentBgmIndex = (currentBgmIndex + 1) % BGM_PLAYLIST.length;
-            
-            bgm.src = BGM_PLAYLIST[currentBgmIndex];
-            bgm.volume = 0.3;
-            bgm.play().catch(e => console.log("BGM next song blocked", e));
+            const nextSong = getNextShuffleBGM();
+            if (nextSong) {
+                bgm.src = nextSong;
+                bgm.volume = 0.3;
+                bgm.play().catch(e => console.log("BGM next song blocked", e));
+            }
         }
 
-        // Event listener saat 1 lagu beres -> Otomatis lanjut lagu berikutnya!
+        // Event otomatis muter lagu acak berikutnya pas 1 lagu beres 🎶
         if (bgm) {
             bgm.addEventListener('ended', () => {
                 if (isPlaying) {
@@ -746,7 +765,7 @@
                 sfxLevelClear.currentTime = 0;
             }
 
-            // Putar BGM sesuai urutan playlist 🎶
+            // Putar BGM acak tanpa pengulangan 🎶
             playBGM();
 
             currentLevel = 1;
@@ -785,7 +804,7 @@
                 sfxLevelClear.currentTime = 0;
             }
 
-            // Lanjut BGM playlist 🎶
+            // Lanjut BGM playlist acak 🎶
             playBGM();
 
             currentLevel++;
