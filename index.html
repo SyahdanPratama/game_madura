@@ -89,10 +89,8 @@
 
     <div id="game-container">
         
-        <!-- Audio BGM & SFX 🎧 -->
-        <audio id="bgm" loop>
-            <source src="audio/lagu_game.mp3" type="audio/mpeg">
-        </audio>
+        <!-- Audio BGM & SFX 🎧 (Atribut loop dibuang biar playlist jalan) -->
+        <audio id="bgm"></audio>
         <audio id="sfx-thankyou">
             <source src="audio/suara_cihuy.mp3" type="audio/mpeg">
         </audio>
@@ -205,8 +203,22 @@
 
     <script>
         // =========================================================================
+        // 🎶 PLAYLIST BGM GAME BERURUTAN (SEQUENTIAL PLAYLIST) 🎼✨
+        // Masukkin semua lagu lu di sini berurutan (Lagu 1 > Lagu 2 > Lagu 3 dst)
+        // =========================================================================
+        const BGM_PLAYLIST = [
+            "audio/lagu_game.mp3",
+            "audio/lagu_game2.mp3",
+            "audio/lagu_game3.mp3",
+            "audio/lagu_game4.mp3",
+            "audio/lagu_game5.mp3",
+            "audio/lagu_game6.mp3",
+            "audio/lagu_game7.mp3",
+        ];
+        let currentBgmIndex = 0; // Menunjuk lagu pertama pas mulai
+
+        // =========================================================================
         // 🖼️ LIST GAMBAR BANNER TAMPILAN AWAL (RANDOM START SCREEN) 🏪✨
-        // Tambahin nama file gambar lu di dalam array ini bre! 👇
         // =========================================================================
         const START_SCREEN_IMAGES = [
             "images/gambar_depan.png",
@@ -214,7 +226,7 @@
             "images/gambar_depan3.png",
             "images/gambar_depan4.png",
             "images/gambar_depan5.png",
-            "images/gambar_depan6.png",
+            "images/gambar_depan6.png"
         ];
 
         // =========================================================================
@@ -342,6 +354,41 @@
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
+        }
+
+        // =========================================================================
+        // 🎼 SISTEM MULTI-BGM PLAYLIST BERURUTAN
+        // =========================================================================
+        function playBGM() {
+            if (!bgm || BGM_PLAYLIST.length === 0) return;
+
+            // Kalo lagu lagi mati / paused, set lagu baru sesuai urutan
+            if (bgm.paused) {
+                bgm.src = BGM_PLAYLIST[currentBgmIndex];
+                bgm.volume = 0.3;
+                bgm.play().catch(e => console.log("BGM autoplay blocked", e));
+            }
+        }
+
+        // Fungsi muter lagu selanjutnya pas lagu sekarang abis 🎶
+        function playNextBGM() {
+            if (BGM_PLAYLIST.length === 0) return;
+            
+            // Naikkan urutan lagu (kembali ke 0 kalo udah lagu paling akhir)
+            currentBgmIndex = (currentBgmIndex + 1) % BGM_PLAYLIST.length;
+            
+            bgm.src = BGM_PLAYLIST[currentBgmIndex];
+            bgm.volume = 0.3;
+            bgm.play().catch(e => console.log("BGM next song blocked", e));
+        }
+
+        // Event listener saat 1 lagu beres -> Otomatis lanjut lagu berikutnya!
+        if (bgm) {
+            bgm.addEventListener('ended', () => {
+                if (isPlaying) {
+                    playNextBGM();
+                }
+            });
         }
 
         function playThankYouSFX() {
@@ -699,8 +746,8 @@
                 sfxLevelClear.currentTime = 0;
             }
 
-            bgm.volume = 0.3;
-            bgm.play().catch(() => console.log("BGM autoplay blocked"));
+            // Putar BGM sesuai urutan playlist 🎶
+            playBGM();
 
             currentLevel = 1;
             score = 0;
@@ -738,8 +785,8 @@
                 sfxLevelClear.currentTime = 0;
             }
 
-            bgm.volume = 0.3;
-            bgm.play().catch(() => console.log("BGM autoplay blocked"));
+            // Lanjut BGM playlist 🎶
+            playBGM();
 
             currentLevel++;
             queue = [];
