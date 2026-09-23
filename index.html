@@ -89,8 +89,11 @@
 
     <div id="game-container">
 
-        <!-- 🎛️ TOMBOL AUDIO MUTE CONTROLLER (Global Overlay - z-60) 🎧✨ -->
+        <!-- 🎛️ TOMBOL AUDIO & PAUSE CONTROLLER (Global Overlay - z-60) 🎧⏸️✨ -->
         <div class="absolute top-3 right-3 z-[60] flex gap-2">
+            <button id="btn-pause" onclick="togglePauseGame()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold p-2.5 rounded-full border-2 border-white/50 shadow-lg active:scale-90 transition-all flex items-center justify-center min-w-[42px] h-[42px]">
+                <span id="icon-pause" class="text-lg">⏸️</span>
+            </button>
             <button id="btn-toggle-bgm" onclick="toggleBGM()" class="bg-green-600 hover:bg-green-500 text-white font-bold p-2.5 rounded-full border-2 border-white/50 shadow-lg active:scale-90 transition-all flex items-center justify-center min-w-[42px] h-[42px]">
                 <span id="icon-bgm" class="text-lg">🎵</span>
             </button>
@@ -126,6 +129,16 @@
                 GAS BUKA
             </button>
             <p class="text-gray-300 mt-5 text-xs text-center">Sampean siap dadi penjaga warmad madura po?<br>Kebangetan kalo ndak iso🥀</p>
+        </div>
+
+        <!-- PAUSE SCREEN OVERLAY ⏸️ -->
+        <div id="pause-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-center glass-panel p-4">
+            <h1 class="title-font text-5xl md:text-6xl text-amber-400 text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mb-2">GAME DIPAUSE</h1>
+            <p class="text-gray-200 text-base md:text-lg mb-8 text-center">Santai bre, ditinggal urusan dulu aja wkwk ☕💨</p>
+
+            <button onclick="togglePauseGame()" class="bg-green-500 hover:bg-green-400 text-white title-font text-2xl py-4 px-10 rounded-full shadow-[0_6px_0_#166534] active:shadow-[0_0px_0_#166534] active:translate-y-2 transition-all">
+                LANJUT MAIN 🚀
+            </button>
         </div>
 
         <!-- LEVEL CLEAR SCREEN 🏆 -->
@@ -187,7 +200,7 @@
                 </div>
             </div>
             <!-- Health / Lives -->
-            <div class="bg-black/60 px-3 py-1.5 rounded-full border border-red-500/50 flex gap-1 text-xl pr-28" id="lives-container">
+            <div class="bg-black/60 px-3 py-1.5 rounded-full border border-red-500/50 flex gap-1 text-xl pr-36" id="lives-container">
                 ❤️ ❤️ ❤️
             </div>
         </div>
@@ -329,6 +342,7 @@
         let gameInterval;
         let spawnInterval;
         let isPlaying = false;
+        let isPaused = false; 
 
         let levelTargetCustomers = 5; 
         let servedCustomersCount = 0;  
@@ -340,6 +354,7 @@
         // DOM Elements
         const elStartScreen = document.getElementById('start-screen');
         const elStartScreenImgContainer = document.getElementById('start-screen-img-container');
+        const elPauseScreen = document.getElementById('pause-screen');
         const elGameOverScreen = document.getElementById('game-over-screen');
         const elGameOverMemeContainer = document.getElementById('game-over-meme-container');
         const elLevelClearScreen = document.getElementById('level-clear-screen');
@@ -370,6 +385,39 @@
         }
 
         // =========================================================================
+        // ⏸️ LOGIKA PAUSE & RESUME GAME CONTROLLER 🎮
+        // =========================================================================
+        function togglePauseGame() {
+            if (!isPlaying) return; // Hanya bisa dipause saat game berjalan
+
+            playClickSFX();
+            isPaused = !isPaused;
+
+            if (isPaused) {
+                // Pause Intervals & BGM
+                if (gameInterval) clearInterval(gameInterval);
+                if (spawnInterval) clearInterval(spawnInterval);
+                bgm.pause();
+
+                // Tampilkan Pause Overlay Screen
+                elPauseScreen.classList.remove('hidden');
+                elPauseScreen.classList.add('flex');
+            } else {
+                // Resume Game & Intervals
+                elPauseScreen.classList.add('hidden');
+                elPauseScreen.classList.remove('flex');
+
+                if (!isBgmMuted) {
+                    playBGM();
+                }
+
+                let spawnDelay = Math.max(1000, 2000 - (currentLevel * 300));
+                gameInterval = setInterval(updateGameLoop, 100);
+                spawnInterval = setInterval(spawnCustomer, spawnDelay);
+            }
+        }
+
+        // =========================================================================
         // 🎛️ LOGIKA MUTE BGM & SFX CONTROLLER 🔕
         // =========================================================================
         function toggleBGM() {
@@ -384,7 +432,7 @@
             } else {
                 btn.className = "bg-green-600 hover:bg-green-500 text-white font-bold p-2.5 rounded-full border-2 border-white/50 shadow-lg active:scale-90 transition-all flex items-center justify-center min-w-[42px] h-[42px]";
                 icon.innerText = "🎵";
-                if (isPlaying) {
+                if (isPlaying && !isPaused) {
                     playBGM();
                 }
             }
@@ -447,7 +495,7 @@
 
         if (bgm) {
             bgm.addEventListener('ended', () => {
-                if (isPlaying && !isBgmMuted) {
+                if (isPlaying && !isPaused && !isBgmMuted) {
                     playNextBGM();
                 }
             });
@@ -586,7 +634,7 @@
         // 🔄 LOGIKA SPAWN CUSTOMER FLEKSIBEL (ANTI-STUCK) 🚀
         // =========================================================================
         function spawnCustomer() {
-            if (!isPlaying) return;
+            if (!isPlaying || isPaused) return;
             if (queue.length >= MAX_QUEUE_SIZE) return;
             
             // Pelanggan baru HANYA berhenti spawn kalo total served + antrean saat ini udah menuhin target level
@@ -685,7 +733,7 @@
         }
 
         function handleItemSelect(itemId, event) {
-            if (!isPlaying || queue.length === 0) return;
+            if (!isPlaying || isPaused || queue.length === 0) return;
 
             let clientX = event.clientX;
             let clientY = event.clientY;
@@ -740,6 +788,7 @@
         function checkLevelCompletion() {
             if (servedCustomersCount >= levelTargetCustomers) {
                 isPlaying = false;
+                isPaused = false;
                 clearInterval(gameInterval);
                 clearInterval(spawnInterval);
 
@@ -750,6 +799,7 @@
                 renderLevelClearMeme();
                 playLevelClearSFX();
 
+                elPauseScreen.classList.add('hidden');
                 elLevelClearScreen.classList.remove('hidden');
                 elLevelClearScreen.classList.add('flex');
                 return true;
@@ -761,7 +811,7 @@
         // 🎮 GAME LOOP UPDATE (DEFEAT & SAFEGUARD CHECKER)
         // =========================================================================
         function updateGameLoop() {
-            if (!isPlaying) return;
+            if (!isPlaying || isPaused) return;
 
             let queueChanged = false;
 
@@ -833,11 +883,13 @@
             lives = 3;
             queue = [];
             isPlaying = true;
+            isPaused = false;
 
             setupLevelConfig();
             updateLivesDisplay();
 
             elStartScreen.classList.add('hidden');
+            elPauseScreen.classList.add('hidden');
             elGameOverScreen.classList.add('hidden');
             elLevelClearScreen.classList.add('hidden');
 
@@ -870,9 +922,11 @@
             currentLevel++;
             queue = [];
             isPlaying = true;
+            isPaused = false;
 
             setupLevelConfig();
 
+            elPauseScreen.classList.add('hidden');
             elLevelClearScreen.classList.add('hidden');
 
             spawnCustomer();
@@ -937,6 +991,7 @@
 
         function endGame() {
             isPlaying = false;
+            isPaused = false;
             clearInterval(gameInterval);
             clearInterval(spawnInterval);
 
@@ -949,6 +1004,7 @@
             renderStartScreenImage(); 
             playGameOverSFX();
 
+            elPauseScreen.classList.add('hidden');
             elGameOverScreen.classList.remove('hidden');
             elGameOverScreen.classList.add('flex');
         }
