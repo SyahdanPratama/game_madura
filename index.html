@@ -88,6 +88,16 @@
 <body>
 
     <div id="game-container">
+
+        <!-- 🎛️ TOMBOL AUDIO MUTE CONTROLLER (Global Overlay - z-50) 🎧✨ -->
+        <div class="absolute top-3 right-3 z-[60] flex gap-2">
+            <button id="btn-toggle-bgm" onclick="toggleBGM()" class="bg-green-600 hover:bg-green-500 text-white font-bold p-2.5 rounded-full border-2 border-white/50 shadow-lg active:scale-90 transition-all flex items-center justify-center min-w-[42px] h-[42px]">
+                <span id="icon-bgm" class="text-lg">🎵</span>
+            </button>
+            <button id="btn-toggle-sfx" onclick="toggleSFX()" class="bg-green-600 hover:bg-green-500 text-white font-bold p-2.5 rounded-full border-2 border-white/50 shadow-lg active:scale-90 transition-all flex items-center justify-center min-w-[42px] h-[42px]">
+                <span id="icon-sfx" class="text-lg">🔊</span>
+            </button>
+        </div>
         
         <!-- Audio BGM & SFX 🎧 -->
         <audio id="bgm"></audio>
@@ -177,7 +187,7 @@
                 </div>
             </div>
             <!-- Health / Lives -->
-            <div class="bg-black/60 px-3 py-1.5 rounded-full border border-red-500/50 flex gap-1 text-xl" id="lives-container">
+            <div class="bg-black/60 px-3 py-1.5 rounded-full border border-red-500/50 flex gap-1 text-xl pr-28" id="lives-container">
                 ❤️ ❤️ ❤️
             </div>
         </div>
@@ -324,6 +334,10 @@
         let spawnedCustomersCount = 0; 
         let servedCustomersCount = 0;  
 
+        // Mute State Variables 🔇
+        let isBgmMuted = false;
+        let isSfxMuted = false;
+
         // DOM Elements
         const elStartScreen = document.getElementById('start-screen');
         const elStartScreenImgContainer = document.getElementById('start-screen-img-container');
@@ -357,6 +371,41 @@
         }
 
         // =========================================================================
+        // 🎛️ LOGIKA MUTE BGM & SFX CONTROLLER 🔕
+        // =========================================================================
+        function toggleBGM() {
+            isBgmMuted = !isBgmMuted;
+            const btn = document.getElementById('btn-toggle-bgm');
+            const icon = document.getElementById('icon-bgm');
+
+            if (isBgmMuted) {
+                bgm.pause();
+                btn.className = "bg-red-600 hover:bg-red-500 text-white font-bold p-2.5 rounded-full border-2 border-white/50 shadow-lg active:scale-90 transition-all flex items-center justify-center min-w-[42px] h-[42px]";
+                icon.innerText = "🔇";
+            } else {
+                btn.className = "bg-green-600 hover:bg-green-500 text-white font-bold p-2.5 rounded-full border-2 border-white/50 shadow-lg active:scale-90 transition-all flex items-center justify-center min-w-[42px] h-[42px]";
+                icon.innerText = "🎵";
+                if (isPlaying) {
+                    playBGM();
+                }
+            }
+        }
+
+        function toggleSFX() {
+            isSfxMuted = !isSfxMuted;
+            const btn = document.getElementById('btn-toggle-sfx');
+            const icon = document.getElementById('icon-sfx');
+
+            if (isSfxMuted) {
+                btn.className = "bg-red-600 hover:bg-red-500 text-white font-bold p-2.5 rounded-full border-2 border-white/50 shadow-lg active:scale-90 transition-all flex items-center justify-center min-w-[42px] h-[42px]";
+                icon.innerText = "🔇";
+            } else {
+                btn.className = "bg-green-600 hover:bg-green-500 text-white font-bold p-2.5 rounded-full border-2 border-white/50 shadow-lg active:scale-90 transition-all flex items-center justify-center min-w-[42px] h-[42px]";
+                icon.innerText = "🔊";
+            }
+        }
+
+        // =========================================================================
         // 🎼 LOGIKA SHUFFLE PLAYLIST TANPA PENGULANGAN 🎲🔥
         // =========================================================================
         function getNextShuffleBGM() {
@@ -375,7 +424,7 @@
         }
 
         function playBGM() {
-            if (!bgm || BGM_PLAYLIST.length === 0) return;
+            if (!bgm || BGM_PLAYLIST.length === 0 || isBgmMuted) return;
 
             if (bgm.paused) {
                 const nextSong = getNextShuffleBGM();
@@ -388,6 +437,7 @@
         }
 
         function playNextBGM() {
+            if (isBgmMuted) return;
             const nextSong = getNextShuffleBGM();
             if (nextSong) {
                 bgm.src = nextSong;
@@ -398,13 +448,14 @@
 
         if (bgm) {
             bgm.addEventListener('ended', () => {
-                if (isPlaying) {
+                if (isPlaying && !isBgmMuted) {
                     playNextBGM();
                 }
             });
         }
 
         function playThankYouSFX() {
+            if (isSfxMuted) return;
             if (sfxThankYou) {
                 sfxThankYou.currentTime = 0;
                 sfxThankYou.volume = 0.8;
@@ -413,6 +464,7 @@
         }
 
         function playOhNoSFX() {
+            if (isSfxMuted) return;
             if (sfxOhNo) {
                 sfxOhNo.currentTime = 0;
                 sfxOhNo.volume = 0.8;
@@ -421,7 +473,7 @@
         }
 
         function playGameOverSFX() {
-            if (!sfxGameOver) return;
+            if (isSfxMuted || !sfxGameOver) return;
             
             if (GAME_OVER_SFX && GAME_OVER_SFX.length > 0) {
                 const randomSfx = GAME_OVER_SFX[Math.floor(Math.random() * GAME_OVER_SFX.length)];
@@ -435,7 +487,7 @@
         }
 
         function playLevelClearSFX() {
-            if (!sfxLevelClear) return;
+            if (isSfxMuted || !sfxLevelClear) return;
 
             if (LEVEL_CLEAR_SFX && LEVEL_CLEAR_SFX.length > 0) {
                 const randomSfx = LEVEL_CLEAR_SFX[Math.floor(Math.random() * LEVEL_CLEAR_SFX.length)];
@@ -447,7 +499,7 @@
         }
 
         function playCoinSFX() {
-            if (!audioCtx) return;
+            if (isSfxMuted || !audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
@@ -463,7 +515,7 @@
         }
 
         function playWrongSFX() {
-            if (!audioCtx) return;
+            if (isSfxMuted || !audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sawtooth';
@@ -478,7 +530,7 @@
         }
 
         function playClickSFX() {
-            if (!audioCtx) return;
+            if (isSfxMuted || !audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'square';
@@ -521,9 +573,6 @@
             return orders;
         }
 
-        // =========================================================================
-        // ⏱️ PATIENCE RATE DIBIKIN 15% LEBIH CEPAT ⚡
-        // =========================================================================
         function getLevelPatienceRate() {
             let baseRate = 1.0; 
             if (currentLevel === 2) {
@@ -531,7 +580,6 @@
             } else if (currentLevel >= 3) {
                 baseRate = 1.0 + (currentLevel * 0.05); 
             }
-            // Pengali 1.15 bikin pengurangan kesabaran 15% lebih kenceng 🏃‍♂️💨
             return (baseRate * 1.15) + (Math.random() * 0.1);
         }
 
@@ -739,11 +787,7 @@
             elLivesContainer.innerText = hearts.trim();
         }
 
-        // =========================================================================
-        // 👥 TARGET PELANGGAN NAMBAH 2 PER LEVEL 🎯
-        // =========================================================================
         function setupLevelConfig() {
-            // Level 1: 5 pelanggan, Level 2: 7 pelanggan, Level 3: 9 pelanggan, dst.
             levelTargetCustomers = 3 + (currentLevel * 2); 
             spawnedCustomersCount = 0;
             servedCustomersCount = 0;
