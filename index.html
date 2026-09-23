@@ -204,7 +204,6 @@
     <script>
         // =========================================================================
         // 🎶 PLAYLIST BGM GAME (SHUFFLE NO-REPEAT SYSTEM) 🎼✨
-        // Masukkin semua daftar lagu lu di sini bre
         // =========================================================================
         const BGM_PLAYLIST = [
             "audio/lagu_game.mp3",
@@ -216,7 +215,7 @@
             "audio/lagu_game7.mp3"
         ];
         
-        let bgmQueue = []; // Antrean lagu yang siap diputer tanpa pengulangan
+        let bgmQueue = []; 
 
         // =========================================================================
         // 🖼️ LIST GAMBAR BANNER TAMPILAN AWAL (RANDOM START SCREEN) 🏪✨
@@ -363,25 +362,21 @@
         function getNextShuffleBGM() {
             if (BGM_PLAYLIST.length === 0) return null;
 
-            // Jika antrean kosong (semua lagu udah pernah diputer), acak ulang dari awal 🔄
             if (bgmQueue.length === 0) {
-                bgmQueue = [...BGM_PLAYLIST]; // Copy playlist utama
+                bgmQueue = [...BGM_PLAYLIST]; 
 
-                // Algoritma Fisher-Yates Shuffle buat ngacak array
                 for (let i = bgmQueue.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [bgmQueue[i], bgmQueue[j]] = [bgmQueue[j], bgmQueue[i]];
                 }
             }
 
-            // Ambil lagu paling atas dari antrean acak 🎵
             return bgmQueue.pop();
         }
 
         function playBGM() {
             if (!bgm || BGM_PLAYLIST.length === 0) return;
 
-            // Muter lagu baru cuma kalo audio lagi posisi mati / paused
             if (bgm.paused) {
                 const nextSong = getNextShuffleBGM();
                 if (nextSong) {
@@ -401,7 +396,6 @@
             }
         }
 
-        // Event otomatis muter lagu acak berikutnya pas 1 lagu beres 🎶
         if (bgm) {
             bgm.addEventListener('ended', () => {
                 if (isPlaying) {
@@ -426,7 +420,6 @@
             }
         }
 
-        // Putar SFX Game Over
         function playGameOverSFX() {
             if (!sfxGameOver) return;
             
@@ -441,7 +434,6 @@
             }
         }
 
-        // Putar SFX Level Clear 🔊🏆
         function playLevelClearSFX() {
             if (!sfxLevelClear) return;
 
@@ -529,6 +521,9 @@
             return orders;
         }
 
+        // =========================================================================
+        // ⏱️ PATIENCE RATE DIBIKIN 15% LEBIH CEPAT ⚡
+        // =========================================================================
         function getLevelPatienceRate() {
             let baseRate = 1.0; 
             if (currentLevel === 2) {
@@ -536,7 +531,8 @@
             } else if (currentLevel >= 3) {
                 baseRate = 1.0 + (currentLevel * 0.05); 
             }
-            return baseRate + (Math.random() * 0.1);
+            // Pengali 1.15 bikin pengurangan kesabaran 15% lebih kenceng 🏃‍♂️💨
+            return (baseRate * 1.15) + (Math.random() * 0.1);
         }
 
         function spawnCustomer() {
@@ -696,7 +692,6 @@
 
                 elNextLevelNum.innerText = currentLevel + 1;
                 
-                // Render meme menang tanpa bounce & putar SFX selebrasi 🏆
                 renderLevelClearMeme();
                 playLevelClearSFX();
 
@@ -744,8 +739,12 @@
             elLivesContainer.innerText = hearts.trim();
         }
 
+        // =========================================================================
+        // 👥 TARGET PELANGGAN NAMBAH 2 PER LEVEL 🎯
+        // =========================================================================
         function setupLevelConfig() {
-            levelTargetCustomers = currentLevel * 5; 
+            // Level 1: 5 pelanggan, Level 2: 7 pelanggan, Level 3: 9 pelanggan, dst.
+            levelTargetCustomers = 3 + (currentLevel * 2); 
             spawnedCustomersCount = 0;
             servedCustomersCount = 0;
             updateHUD();
@@ -765,7 +764,6 @@
                 sfxLevelClear.currentTime = 0;
             }
 
-            // Putar BGM acak tanpa pengulangan 🎶
             playBGM();
 
             currentLevel = 1;
@@ -804,7 +802,6 @@
                 sfxLevelClear.currentTime = 0;
             }
 
-            // Lanjut BGM playlist acak 🎶
             playBGM();
 
             currentLevel++;
@@ -845,7 +842,6 @@
             }
         }
 
-        // Render Gambar Selebrasi Pas Level Clear (TANPA BOUNCE 🗿) 🏆✨
         function renderLevelClearMeme() {
             if (!elLevelClearMemeContainer) return;
 
@@ -861,7 +857,6 @@
             }
         }
 
-        // Render Gambar Meme Usil Pas Kalah 🤪
         function renderGameOverMeme() {
             if (!elGameOverMemeContainer) return;
             
@@ -888,7 +883,7 @@
             elFinalScore.innerText = score.toLocaleString('id-ID');
             
             renderGameOverMeme();
-            renderStartScreenImage(); // Acak ulang gambar start screen buat sesi berikutnya 🏪✨
+            renderStartScreenImage(); 
             playGameOverSFX();
 
             elGameOverScreen.classList.remove('hidden');
