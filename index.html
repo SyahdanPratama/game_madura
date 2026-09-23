@@ -89,7 +89,7 @@
 
     <div id="game-container">
 
-        <!-- 🎛️ TOMBOL AUDIO MUTE CONTROLLER (Global Overlay - z-50) 🎧✨ -->
+        <!-- 🎛️ TOMBOL AUDIO MUTE CONTROLLER (Global Overlay - z-60) 🎧✨ -->
         <div class="absolute top-3 right-3 z-[60] flex gap-2">
             <button id="btn-toggle-bgm" onclick="toggleBGM()" class="bg-green-600 hover:bg-green-500 text-white font-bold p-2.5 rounded-full border-2 border-white/50 shadow-lg active:scale-90 transition-all flex items-center justify-center min-w-[42px] h-[42px]">
                 <span id="icon-bgm" class="text-lg">🎵</span>
@@ -331,7 +331,6 @@
         let isPlaying = false;
 
         let levelTargetCustomers = 5; 
-        let spawnedCustomersCount = 0; 
         let servedCustomersCount = 0;  
 
         // Mute State Variables 🔇
@@ -583,9 +582,15 @@
             return (baseRate * 1.15) + (Math.random() * 0.1);
         }
 
+        // =========================================================================
+        // 🔄 LOGIKA SPAWN CUSTOMER FLEKSIBEL (ANTI-STUCK) 🚀
+        // =========================================================================
         function spawnCustomer() {
+            if (!isPlaying) return;
             if (queue.length >= MAX_QUEUE_SIZE) return;
-            if (spawnedCustomersCount >= levelTargetCustomers) return;
+            
+            // Pelanggan baru HANYA berhenti spawn kalo total served + antrean saat ini udah menuhin target level
+            if (servedCustomersCount + queue.length >= levelTargetCustomers) return;
 
             let avatarHtml = '';
             const randomEmojiFallback = DEFAULT_CUSTOMERS[Math.floor(Math.random() * DEFAULT_CUSTOMERS.length)];
@@ -607,7 +612,6 @@
             };
 
             queue.push(customer);
-            spawnedCustomersCount++;
             rebuildQueueDOM();
         }
 
@@ -710,7 +714,10 @@
                     queue.shift();
                     rebuildQueueDOM();
 
-                    checkLevelCompletion();
+                    // Cek kelar level, kalo belom langsung coba panggil pelanggan baru 🏃‍♂️
+                    if (!checkLevelCompletion()) {
+                        spawnCustomer();
+                    }
                 } else {
                     playClickSFX();
                     rebuildQueueDOM();
@@ -731,7 +738,7 @@
         }
 
         function checkLevelCompletion() {
-            if (servedCustomersCount >= levelTargetCustomers && queue.length === 0) {
+            if (servedCustomersCount >= levelTargetCustomers) {
                 isPlaying = false;
                 clearInterval(gameInterval);
                 clearInterval(spawnInterval);
@@ -745,9 +752,14 @@
 
                 elLevelClearScreen.classList.remove('hidden');
                 elLevelClearScreen.classList.add('flex');
+                return true;
             }
+            return false;
         }
 
+        // =========================================================================
+        // 🎮 GAME LOOP UPDATE (DEFEAT & SAFEGUARD CHECKER)
+        // =========================================================================
         function updateGameLoop() {
             if (!isPlaying) return;
 
@@ -756,6 +768,7 @@
             for (let i = queue.length - 1; i >= 0; i--) {
                 queue[i].patience -= queue[i].patienceRate;
 
+                // Pelanggan kabur / kehabisan kesabaran
                 if (queue[i].patience <= 0) {
                     queue.splice(i, 1);
                     lives--;
@@ -774,9 +787,15 @@
 
             if (queueChanged) {
                 rebuildQueueDOM();
-                checkLevelCompletion();
+                // Kalo antrean berkurang (misal kabur), panggil pelanggan pengganti 🔥
+                spawnCustomer();
             } else {
                 updatePatienceBarsDOM();
+            }
+
+            // SAFEGUARD: Kalo antrean mendadak kosong padahal target belum tercapai, panggil paksa! 🛡️
+            if (queue.length === 0 && servedCustomersCount < levelTargetCustomers) {
+                spawnCustomer();
             }
         }
 
@@ -789,7 +808,6 @@
 
         function setupLevelConfig() {
             levelTargetCustomers = 3 + (currentLevel * 2); 
-            spawnedCustomersCount = 0;
             servedCustomersCount = 0;
             updateHUD();
         }
@@ -825,6 +843,7 @@
 
             renderInventory();
 
+            // Spawn awal 2 pelanggan
             spawnCustomer();
             spawnCustomer();
 
