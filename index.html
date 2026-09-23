@@ -91,7 +91,8 @@
 
         <!-- 🎛️ TOMBOL AUDIO & PAUSE CONTROLLER (Global Overlay - z-60) 🎧⏸️✨ -->
         <div class="absolute top-3 right-3 z-[60] flex gap-2">
-            <button id="btn-pause" onclick="togglePauseGame()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold p-2.5 rounded-full border-2 border-white/50 shadow-lg active:scale-90 transition-all flex items-center justify-center min-w-[42px] h-[42px]">
+            <!-- Tombol Pause disembunyiin default (hidden), bakal dipanggil pas startGame() -->
+            <button id="btn-pause" onclick="togglePauseGame()" class="hidden bg-amber-600 hover:bg-amber-500 text-white font-bold p-2.5 rounded-full border-2 border-white/50 shadow-lg active:scale-90 transition-all flex items-center justify-center min-w-[42px] h-[42px]">
                 <span id="icon-pause" class="text-lg">⏸️</span>
             </button>
             <button id="btn-toggle-bgm" onclick="toggleBGM()" class="bg-green-600 hover:bg-green-500 text-white font-bold p-2.5 rounded-full border-2 border-white/50 shadow-lg active:scale-90 transition-all flex items-center justify-center min-w-[42px] h-[42px]">
@@ -116,7 +117,7 @@
         <audio id="sfx-levelclear"></audio>
 
         <!-- START SCREEN -->
-        <div id="start-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center glass-panel p-4">
+        <div id="start-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center glass-panel p-4 pt-12">
             <h1 class="title-font text-5xl md:text-6xl text-yellow-400 text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mb-1">JURAGAN</h1>
             <h1 class="title-font text-4xl md:text-5xl text-white text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mb-3">WARMAD MADURA</h1>
             
@@ -132,7 +133,7 @@
         </div>
 
         <!-- PAUSE SCREEN OVERLAY ⏸️ -->
-        <div id="pause-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-center glass-panel p-4">
+        <div id="pause-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-center glass-panel p-4 pt-12">
             <h1 class="title-font text-5xl md:text-6xl text-amber-400 text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mb-2">GAME DIPAUSE</h1>
             <p class="text-gray-200 text-base md:text-lg mb-8 text-center">Di-pause toh? Oke🗿<br><span class="text-xs text-yellow-300">Kapan baliknya mas?</span></p>
 
@@ -142,7 +143,8 @@
         </div>
 
         <!-- LEVEL CLEAR SCREEN 🏆 -->
-        <div id="level-clear-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-between glass-panel pt-6 pb-8 px-4 overflow-y-auto">
+        <!-- Tambahan pt-14 / pt-16 biar tulisan nggak nabrak tombol audio kanan atas -->
+        <div id="level-clear-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-between glass-panel pt-14 md:pt-16 pb-8 px-4 overflow-y-auto">
             
             <div class="flex flex-col items-center text-center">
                 <h1 class="title-font text-4xl sm:text-5xl text-green-400 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] mb-1">LEVEL SELESAI</h1>
@@ -162,7 +164,8 @@
         </div>
 
         <!-- GAME OVER SCREEN (MOBILE OPTIMIZED 🤪) -->
-        <div id="game-over-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-between glass-panel pt-6 pb-8 px-4 overflow-y-auto">
+        <!-- Tambahan pt-14 / pt-16 biar tulisan WARUNG TUTUP aman ga ketutupan tombol audio -->
+        <div id="game-over-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-between glass-panel pt-14 md:pt-16 pb-8 px-4 overflow-y-auto">
             
             <!-- Header Teks Diketatin Ke Atas ⬆️ -->
             <div class="flex flex-col items-center text-center">
@@ -367,6 +370,7 @@
         const elLivesContainer = document.getElementById('lives-container');
         const elQueueContainer = document.getElementById('queue-container');
         const elInventoryGrid = document.getElementById('inventory-grid');
+        const elBtnPause = document.getElementById('btn-pause');
         const bgm = document.getElementById('bgm');
         const sfxThankYou = document.getElementById('sfx-thankyou');
         const sfxOhNo = document.getElementById('sfx-ohno');
@@ -790,6 +794,9 @@
 
                 bgm.pause();
 
+                // Sembunyiin tombol Pause pas level kelar 🛑
+                if (elBtnPause) elBtnPause.classList.add('hidden');
+
                 elNextLevelNum.innerText = currentLevel + 1;
                 
                 renderLevelClearMeme();
@@ -881,6 +888,9 @@
             isPlaying = true;
             isPaused = false;
 
+            // Munculin tombol Pause pas gameplay mulai ⏸️
+            if (elBtnPause) elBtnPause.classList.remove('hidden');
+
             setupLevelConfig();
             updateLivesDisplay();
 
@@ -919,6 +929,9 @@
             queue = [];
             isPlaying = true;
             isPaused = false;
+
+            // Pastiin tombol Pause nongol lagi pas lanjut level
+            if (elBtnPause) elBtnPause.classList.remove('hidden');
 
             setupLevelConfig();
 
@@ -993,6 +1006,9 @@
 
             bgm.pause();
             bgm.currentTime = 0;
+
+            // Sembunyiin tombol Pause pas Game Over 🛑
+            if (elBtnPause) elBtnPause.classList.add('hidden');
 
             elFinalScore.innerText = score.toLocaleString('id-ID');
             
